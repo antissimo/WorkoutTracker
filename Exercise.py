@@ -7,8 +7,9 @@ class TypeOfWorkout(Enum):
     Weighted = 3
 
 class Exercise:
-     def __init__(self,type,name=None,quantity=None,weight=None,distance=None,intensity=None):
-    
+     def __init__(self,id,parentId,type,name=None,quantity=None,weight=None,distance=None,intensity=None):
+      self.id=id
+      self.parentId=parentId
       self.type=type
       self.name=name
       self.quantity=quantity

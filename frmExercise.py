@@ -1,7 +1,10 @@
 import tkinter as tk
 from Workout import Workout
 from Exercise import Exercise
-
+from IdGenerator import GenerateId
+from tkcalendar import DateEntry
+from datetime import datetime
+from time import strptime
 workouts=[]
 
 exercises=[]
@@ -9,7 +12,8 @@ exercises=[]
 
 def CreateExercise(args,workout,workout_window,exercise=None):
     if exercise==None:
-        newExercise = Exercise(type=args["Type"])
+        newExercise = Exercise(id=GenerateId(exercises),parentId=workout.id,type=args["Type"])
+        exercises.append(newExercise)
         if("Name" in args):
             newExercise.name=args["Name"]
         if("Quantity" in args):
@@ -58,7 +62,7 @@ def ChooseExercise(workout,exercise):
         WeightedWindow(workout=workout,exercise=exercise)
 
 def AddWorkouts(workout=None ,workout_window=None):
-    currY=75
+    currY=150
 
     if workout_window==None:
         return False
@@ -88,14 +92,61 @@ def NewExercise(workout,workout_window):
     weighted = tk.Button(exercise_window,text="Teretana",width="15",height="2",bg="red",command=lambda:WeightedWindow(exercise_window,workout,workout_window))
     weighted.place(x=15,y=215) 
 
+def ValidateWorkout(window=None,args=None,workout=None):
+    if window==None or args==None or workout==None:
+        return False
+    for arg in args.values():
+        if(arg==None or arg=='' or arg==0):
+            errorLabel = tk.Label(window,text="Ispunite sva polja!",bg="red")
+            errorLabel.pack()
+            errorLabel.place(x=200,y=50)
+            return False
+    workout.date = args ["date"]
+    workout.start = datetime.strptime(args ["start"][0:5], '%H:%M').time()
+    workout.end = datetime.strptime(args ["end"][0:5], '%H:%M').time()
+    window.destroy()
 def OpenWorkout(workout = None):
-    if workout==None:
-        workout= Workout()
+    flag = workout==None
+    if flag:
+        workout= Workout(id=GenerateId(exercises))
+        workouts.append(workout)
+
     workout_window = tk.Toplevel()
     workout_window.title("Trening")
     workout_window.geometry("600x400")
     newExercise = tk.Button(workout_window,text="Dodaj vjezbu",width="15",height="2",bg="grey",command=lambda:NewExercise(workout,workout_window))
     newExercise.place(x=15,y=15)
+
+
+    startLabel = tk.Label(workout_window,text="Pocetak treninga npr 13:30")
+    startLabel.pack()
+    startLabel.place(x=200,y=100)
+    start = tk.Entry(workout_window)
+    start.pack()
+    start.place(x=200,y=125)
+
+
+    
+    endLabel = tk.Label(workout_window,text="Kraj treninga npr 15:00")
+    endLabel.pack()
+    endLabel.place(x=200,y=175)
+    end = tk.Entry(workout_window)
+    end.pack()
+    end.place(x=200,y=200)
+
+    date=DateEntry(workout_window,selectmode='day')
+    date.grid(row=1,column=1,padx=15)
+
+    endButton = tk.Button(workout_window,text="Kraj",width="30",height="2",bg="grey",command=lambda:ValidateWorkout(workout_window,{"date":date.get_date(),"start":start.get(),"end":end.get()},workout))
+    endButton.place(x=15,y=300)
+
+
+    date.place(x=15,y=100)
+
+    if not flag:
+        start.insert(0,workout.startStringTrimmed())
+        end.insert(0,workout.endStringTrimmed())
+
     AddWorkouts(workout,workout_window)
 
 def RunningWindow(window=None,workout=None,workout_window=None,exercise=None):

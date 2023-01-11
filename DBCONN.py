@@ -1,38 +1,78 @@
-import mysql.connector
+import pypyodbc as odbc
 
-def ConnectToDataBase():
-    config = {
-        'user': 'korisnicko_ime',
-        'password': 'lozinka',
-        'host': 'localhost',
-        'database': 'ime_baze',
-        'raise_on_warnings': True
-    }
-    try:
-        cnx = mysql.connector.connect(**config)
-    except mysql.connector.Error as err:
-        if err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Pogrešno korisničko ime ili lozinka")
-        elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
-            print("Baza podataka ne postoji")
-        else:
-            print(err)
+
+from Workout import Workout
+from datetime import datetime
+from time import strptime
+
+def AddZeroes(integer):
+    if (integer==0):
+        return "00"
     else:
-        return cnx
+        return str(integer)
 
-cnx = ConnectToDataBase()
+def SaveStateRepository(workouts):
+    
+    driver = 'SQL SERVER'
+    server ='DESKTOP-58RHK6B\SQLEXPRESS'
+    database = 'WorkoutTracker'
+
+    connectionString = f"""
+        DRIVER={{{driver}}};
+        SERVER={server};
+        DATABASE={database};
+        Trust_Connection=yes;
+    """
+    connection = odbc.connect(connectionString)
+    cursor = connection.cursor()
+    cursor.execute('DELETE FROM dbo.workouts')
+    for i in workouts:
+        id=i.id
+        date=workouts[i].DateString()
+        start=AddZeroes(i.start.hour)+":"+AddZeroes(i.start.minute)+":"+AddZeroes(i.start.second)
+        end=AddZeroes(i.end.hour)+":"+AddZeroes(i.end.minute)+":"+AddZeroes(i.end.second)
+        query=f"INSERT INTO dbo.workouts values({str(id)},'{date}','{start}','{end}')"
+
+        cursor.execute(query)
+    cursor.close()
+    del cursor
+    
+
+def GetWorkoutsRepository(workouts=None):
+    workouts=[]
+    driver = 'SQL Server'
+    server ='DESKTOP-58RHK6B\SQLEXPRESS'
+    database = 'WorkoutTracker'
+
+    connectionString = f"""
+        Driver={{{driver}}};
+        Server={server};
+        DATABASE={database};
+        Trust_Connection=yes;
+    """
+    try:
+        connection = odbc.connect(connectionString)
+    except Exception as e:
+        print(e)
+        return 0
+    cursor = connection.cursor()
 
 
+    try:
+        cursor.execute('SELECT * FROM dbo.Workouts')
+    except Exception as e:
+        print(e)
 
 
-def FetchData(cnx, tablica):
-    cursor = cnx.cursor()
-    upit = "SELECT * FROM " + tablica
-    cursor.execute(upit)
-    podaci = cursor.fetchall()
-    return podaci
-
-
-
-
-podaci = FetchData(cnx, "tablica")
+    for i in cursor:
+        id = i[0]
+        date =  datetime.strptime(i[1], '%Y-%d-%m').date()
+        start = datetime.strptime(i[2][0:8], '%H:%M:%S').time()
+        end = datetime.strptime(i[3][0:8], '%H:%M:%S').time()
+        newWorkout = Workout(id=id,date=date,start=start,end=end)   
+        workouts.append(newWorkout)
+    cursor.execute('SELECT * FROM dbo.Exercises')
+    ## Napravi da se doda po parentIdu u workouts u listu exercisea svakon objektu
+     
+    
+    
