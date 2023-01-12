@@ -10,7 +10,7 @@ class Workout:
         self.listOfExercises=listOfExercises
     def DateString(self):
         #dateString =  datetime.strptime(str(self.date), '%Y-%d-%m').date()
-        return str(self.date)
+        return f"{self.date.year}-{self.date.month}-{self.date.day}"
     def startString(self):
         return str(self.start)
     def endString(self):

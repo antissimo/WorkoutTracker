@@ -2,6 +2,7 @@ import pypyodbc as odbc
 
 
 from Workout import Workout
+from Exercise import Exercise
 from datetime import datetime
 from time import strptime
 
@@ -11,68 +12,81 @@ def AddZeroes(integer):
     else:
         return str(integer)
 
+def WorkoutToString(workout):
+        id=str(workout.id)
+        date=workout.DateString()
+        start=AddZeroes(workout.start.hour)+":"+AddZeroes(workout.start.minute)+":"+AddZeroes(workout.start.second)
+        end=AddZeroes(workout.end.hour)+":"+AddZeroes(workout.end.minute)+":"+AddZeroes(workout.end.second)
+        return f"{id} {date} {start} {end}\n"
+def NullChecker(element):
+    if (element==None):
+        return "None"
+    return element
+
+def ExerciseToString(exercise):
+    id=str(exercise.id)
+    parentId=str(exercise.parentId)
+    type=str(exercise.type)
+    name=str(NullChecker(exercise.name))
+    quantity=str(NullChecker(exercise.quantity))
+    weight=str(NullChecker(exercise.weight))
+    distance=str(NullChecker(exercise.distance))
+    intensity=str(NullChecker(exercise.intensity))
+    return f"{id} {parentId} {type} {name} {quantity}  {weight} {distance} {intensity}\n"
 def SaveStateRepository(workouts):
-    
-    driver = 'SQL SERVER'
-    server ='DESKTOP-58RHK6B\SQLEXPRESS'
-    database = 'WorkoutTracker'
+    if workouts==None:
+        return 1
+    WorkoutFile= open("Workouts.txt", "w")
+    ExercisesFile= open("Exercises.txt","w")
 
-    connectionString = f"""
-        DRIVER={{{driver}}};
-        SERVER={server};
-        DATABASE={database};
-        Trust_Connection=yes;
-    """
-    connection = odbc.connect(connectionString)
-    cursor = connection.cursor()
-    cursor.execute('DELETE FROM dbo.workouts')
-    for i in workouts:
-        id=i.id
-        date=workouts[i].DateString()
-        start=AddZeroes(i.start.hour)+":"+AddZeroes(i.start.minute)+":"+AddZeroes(i.start.second)
-        end=AddZeroes(i.end.hour)+":"+AddZeroes(i.end.minute)+":"+AddZeroes(i.end.second)
-        query=f"INSERT INTO dbo.workouts values({str(id)},'{date}','{start}','{end}')"
-
-        cursor.execute(query)
-    cursor.close()
-    del cursor
-    
-
+    for workout in workouts:
+        WorkoutFile.write(WorkoutToString(workout))        
+        for exercise in workout.listOfExercises:
+            ExercisesFile.write(ExerciseToString(exercise))
+    WorkoutFile.close()
+def ReverseNullChecker(element):
+    if element=="None":
+        return None
+    return element
+def ReverseNullCheckerInt(element):
+    if element=="None":
+        return None
+    return int(element)
+def CreateWorkout(line):
+    arr = line.split()
+    newWorkout = Workout(int(arr[0]))
+    newWorkout.date=datetime(int(arr[1][0:4]),int(arr[1][5:7]),int(arr[1][8:10]))
+    newWorkout.start=datetime.strptime(arr[2][0:8], '%H:%M:%S').time()
+    newWorkout.end=datetime.strptime(arr[3][0:8], '%H:%M:%S').time()
+    return newWorkout
+def CreateExercise(line):
+    arr=line.split()
+    newExercise = Exercise(int(arr[0]),int(arr[1]),int(arr[2]))
+    newExercise.name=ReverseNullChecker(arr[3])
+    newExercise.quantity=ReverseNullCheckerInt(arr[4])
+    newExercise.weight=ReverseNullCheckerInt(arr[4])
+    newExercise.distance=ReverseNullCheckerInt(arr[4])
+    newExercise.intensity=ReverseNullCheckerInt(arr[4])
+    return newExercise
+def MatchExerciseWithWorkout(exercise,workouts):
+    if exercise==None or workouts==None:
+        print("Error")
+        return 1
+    for workout in workouts:
+        if exercise.parentId==workout.id:
+            if(workout.listOfExercises==None):
+                workout.listOfExercises=[exercise]
+            else:
+                workout.listOfExercises.append(exercise)
 def GetWorkoutsRepository(workouts=None):
     workouts=[]
-    driver = 'SQL Server'
-    server ='DESKTOP-58RHK6B\SQLEXPRESS'
-    database = 'WorkoutTracker'
-
-    connectionString = f"""
-        Driver={{{driver}}};
-        Server={server};
-        DATABASE={database};
-        Trust_Connection=yes;
-    """
-    try:
-        connection = odbc.connect(connectionString)
-    except Exception as e:
-        print(e)
-        return 0
-    cursor = connection.cursor()
-
-
-    try:
-        cursor.execute('SELECT * FROM dbo.Workouts')
-    except Exception as e:
-        print(e)
-
-
-    for i in cursor:
-        id = i[0]
-        date =  datetime.strptime(i[1], '%Y-%d-%m').date()
-        start = datetime.strptime(i[2][0:8], '%H:%M:%S').time()
-        end = datetime.strptime(i[3][0:8], '%H:%M:%S').time()
-        newWorkout = Workout(id=id,date=date,start=start,end=end)   
-        workouts.append(newWorkout)
-    cursor.execute('SELECT * FROM dbo.Exercises')
-    ## Napravi da se doda po parentIdu u workouts u listu exercisea svakon objektu
-     
-    
+    WorkoutFile= open("Workouts.txt", "r")
+    ExercisesFile= open("Exercises.txt","r")
+    WorkoutLines = WorkoutFile.readlines()
+    ExerciseLines= ExercisesFile.readlines()
+    for workout in WorkoutLines:
+        workouts.append(CreateWorkout(workout))
+    for exercise in ExerciseLines:
+        MatchExerciseWithWorkout(CreateExercise(exercise),workouts)
+    return workouts
     

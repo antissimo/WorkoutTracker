@@ -1,19 +1,23 @@
 import tkinter as tk
 from Workout import Workout
 from Exercise import Exercise
-from IdGenerator import GenerateId
+from IdGenerator import GenerateIdWorkout,GenerateIdExercise
 from tkcalendar import DateEntry
 from datetime import datetime
 from time import strptime
 workouts=[]
 
-exercises=[]
 
 
+def ReturnWorkoutsToMain():
+    someWorkouts=[]
+    for workout in workouts:
+        someWorkouts.append(workout)
+    workouts.clear()
+    return someWorkouts
 def CreateExercise(args,workout,workout_window,exercise=None):
     if exercise==None:
-        newExercise = Exercise(id=GenerateId(exercises),parentId=workout.id,type=args["Type"])
-        exercises.append(newExercise)
+        newExercise = Exercise(id=GenerateIdExercise(),parentId=workout.id,type=args["Type"])
         if("Name" in args):
             newExercise.name=args["Name"]
         if("Quantity" in args):
@@ -40,6 +44,7 @@ def CreateExercise(args,workout,workout_window,exercise=None):
         if("Distance" in args):
             exercise.distance=args["Distance"]
     AddWorkouts(workout,workout_window)
+    globalWorkout=workout
 
 def ValidateExercise(window=None,args=None,workout=None,workout_window=None,exercise=None):
     if (args==None or window==None or workout==None):
@@ -108,7 +113,7 @@ def ValidateWorkout(window=None,args=None,workout=None):
 def OpenWorkout(workout = None):
     flag = workout==None
     if flag:
-        workout= Workout(id=GenerateId(exercises))
+        workout= Workout(id=GenerateIdWorkout())
         workouts.append(workout)
 
     workout_window = tk.Toplevel()

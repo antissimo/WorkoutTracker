@@ -4,4 +4,4 @@ def SaveState(workouts):
 
 
 def GetWorkouts():
-    GetWorkoutsRepository()
+    return GetWorkoutsRepository()
