@@ -1,6 +1,6 @@
 import tkinter as tk
 from frmExercise import OpenWorkout,workouts,ReturnWorkoutsToMain
-from service import SaveState,GetWorkouts
+from service import SaveState,GetWorkouts,DeleteAll
 from frmListOfWorkouts import ListWorkouts
 mainWorkouts=[]
 
@@ -26,10 +26,10 @@ def ListWorkoutsMain():
     ListWorkouts(mainWorkouts)
     return 0
 def SaveStateMain():
+    UpdateWorkoutsNew()
     SaveState(mainWorkouts)
     return 0
 def MainWindow():
-
     window = tk.Tk()
     window.title("Aplikacija za pracenje vjezbanja")
     window.geometry("900x600") 
@@ -46,7 +46,13 @@ def MainWindow():
     GetButton = tk.Button(window,text="Dohvati",width="10",height="2",bg="grey",command=lambda:UpdateWorkouts())
     GetButton.place(x=300,y=300) 
 
+    ClearAllButton = tk.Button(window,text="Izbrisi sve",width="10",height="2",bg="grey",command=lambda:DeleteAll(window))
+    ClearAllButton.place(x=500,y=500)
 
+    StatsButton = tk.Button(window,text="Izbrisi sve",width="10",height="2",bg="grey",command=lambda:DeleteAll(window))
+    StatsButton.place(x=500,y=500)
+
+    UpdateWorkouts()
 
     window.mainloop()
 

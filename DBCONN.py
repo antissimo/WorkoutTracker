@@ -55,7 +55,10 @@ def ReverseNullCheckerInt(element):
 def CreateWorkout(line):
     arr = line.split()
     newWorkout = Workout(int(arr[0]))
-    newWorkout.date=datetime(int(arr[1][0:4]),int(arr[1][5:7]),int(arr[1][8:10]))
+    first = [i for i, n in enumerate(arr[1]) if n == '-'][0]
+    second = [i for i, n in enumerate(arr[1]) if n == '-'][1]
+
+    newWorkout.date=datetime(int(arr[1][0:first]),int(arr[1][first+1:second]),int(arr[1][second+1:len(arr[1])]))
     newWorkout.start=datetime.strptime(arr[2][0:8], '%H:%M:%S').time()
     newWorkout.end=datetime.strptime(arr[3][0:8], '%H:%M:%S').time()
     return newWorkout
@@ -90,3 +93,11 @@ def GetWorkoutsRepository(workouts=None):
         MatchExerciseWithWorkout(CreateExercise(exercise),workouts)
     return workouts
     
+
+
+def DeleteAllRepository(window):
+    open("ExerciseId.txt", "w").close()
+    open("WorkoutId.txt", "w").close()
+    open("Exercises.txt", "w").close()
+    open("Workouts.txt", "w").close()
+    window.destroy()

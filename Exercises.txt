@@ -1,3 +1,5 @@
-14 10 2 Sklekovi 12  None None None
-15 10 2 Cucnjevi 25  None None None
-16 11 1 Trcanje None  None 8 6
+0 1 1 Trcanje None  None None None
+1 2 3 Bench 15  15 15 15
+2 2 1 Trcanje None  None None None
+3 3 1 Trcanje None  None 11 5
+4 3 3 Bench 15  20 None None
