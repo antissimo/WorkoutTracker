@@ -171,7 +171,7 @@ def RunningWindow(window=None,workout=None,workout_window=None,exercise=None):
     distanceLabel.place(x=15,y=100)
     distance = tk.Entry(running_window)
     distance.pack()
-    distance.place(x=15,y=125)
+    distance.place(x=15,y=125) 
 
     if exercise!=None:
         intensity.set(exercise.intensity)

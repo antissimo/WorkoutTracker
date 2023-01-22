@@ -15,6 +15,12 @@ class Workout:
         return str(self.start)
     def endString(self):
         return str(self.end)
+    def IntLength(self):
+        differenceInMinutes=(self.end.hour*60+self.end.minute) - (self.start.hour*60+self.start.minute)
+        len = differenceInMinutes/60
+        return len
+
+
     def LengthOfWorkout(self):
         differenceInMinutes=(self.end.hour*60+self.end.minute) - (self.start.hour*60+self.start.minute)
         len = f"{differenceInMinutes//60}:{differenceInMinutes%60}"

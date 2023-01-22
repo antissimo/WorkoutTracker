@@ -1,12 +1,7 @@
 import tkinter as tk
 from frmExercise import OpenWorkout
-import matplotlib
-matplotlib.use('TkAgg')
-
-from numpy import arange, sin, pi
-from matplotlib.backends.backend_tkagg import ( FigureCanvasTkAgg, NavigationToolbar2Tk)
-from matplotlib.backend_bases import key_press_handler
-from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import numpy as np
 
 buttons=[]
 def ListWorkouts(workouts=None):
@@ -18,8 +13,14 @@ def ListWorkouts(workouts=None):
     
     SaveButton = tk.Button(list_window,text="Osvjezi",width="10",height="2",bg="blue",command=lambda:AddWorkouts(workouts,list_window))
     SaveButton.place(x=15,y=20) 
-    PlotButton = tk.Button(list_window,text="Napravi graf vjezbanja",width="20",height="2",bg="blue",command=lambda:AddGraph(workouts))
+    PlotButton = tk.Button(list_window,text="Napravi graf vjezbanja",width="20",height="2",bg="blue",command=lambda:AddGraph(workouts,Plot.get()))
     PlotButton.place(x=100,y=20)
+    PlotLabel = tk.Label(list_window,text="Napisite za koju godinu zelite graf (defaultno je trenutna godina)")
+    PlotLabel.pack()
+    PlotLabel.place(x=250,y=20)
+    Plot = tk.Entry(list_window)
+    Plot.pack()
+    Plot.place(x=250,y=40) 
     AddWorkouts(workouts,list_window)
     
 def AddWorkouts(workouts=None,window=None):
@@ -35,24 +36,28 @@ def AddWorkouts(workouts=None,window=None):
         workout.place(x=15,y=currY+20)
         buttons.append(workout)
         currY+=30
-def AddGraph(workouts=None):
-    if workouts==None :
+
+def GetAmountOfHours(month=None,year=None,workouts=None):
+    if month==None or year==None or workouts==None:
         return 0
-    plot_window = tk.Toplevel()
-    plot_window.title("Graf treninga")
-    plot_window.geometry("900x600")
+    cnt=0
+    for workout in workouts:
+        if workout.date.year==year and workout.date.month==month:
+            cnt+=int(workout.IntLength())
+    return cnt
 
-    f = Figure(figsize=(5, 4), dpi=100)
-    a = f.add_subplot(111)
-    t = arange(1, 12, 1)
-    s = sin(2*pi*t)
-    f.suptitle('Graf za 2022. godinu', fontsize=16)
 
-    a.plot(t, s) 
-    canvas = FigureCanvasTkAgg(f, master=plot_window)
-    canvas.draw()
-    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-    toolbar = NavigationToolbar2Tk(canvas, plot_window)
-    toolbar.update()
-    canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+def AddGraph(workouts=None,year=None):
+    fig,ax = plt.subplots()
+    if year==None or year=='':
+        year=2023
+    else:
+        year=int(year)
+    fruits = ['JAN', 'FEB', 'MAR', 'APR','MAY', 'JUN', 'JUL', 'AUG','SEP', 'OCT', 'NOV', 'DEC']
+    counts = [GetAmountOfHours(i,year,workouts) for i in range(1,13,1)]
+    ax.set_title(f"Graf vjezbanja za godinu {year}.")
+
+    ax.bar(fruits, counts, label=fruits, color='red')
+
+    plt.show()
